@@ -85,7 +85,7 @@ export default function App() {
             <section className="editor-panel">
               <div className="editor-toolbar"><label htmlFor="generated-script">Generated Script (Editable)</label><div className="editor-actions"><button className="clear-button" onClick={()=>setScript("")}><Trash2 size={12}/> Clear</button><button className="copy-button" onClick={copyScript}>{copied?<Check size={12}/>:<Copy size={12}/>} {copied?"Copied!":"Copy Script"}</button></div></div>
               <textarea id="generated-script" className="script-editor" value={script} onChange={e=>setScript(e.target.value)} placeholder="Your AI-generated script will appear here. You can edit it freely..." spellCheck/>
-              <div className="editor-footer"><span><FileText size={12}/> {script.trim()?script.trim().split(/\s+/).length:0} words</span><span><Clock3 size={12}/> ~{Math.max(1,Math.ceil((script.trim()?script.trim().split(/\s+/).length:0)/130)} min read</span></div>
+              <div className="editor-footer"><span><FileText size={12}/> {script.trim()?script.trim().split(/\s+/).length:0} words</span><span><Clock3 size={12}/> ~{Math.max(1,Math.ceil((script.trim()?script.trim().split(/\s+/).length:0)/130))} min read</span></div>
             </section>
           </div>
         </div>
