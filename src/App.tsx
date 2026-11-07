@@ -38,7 +38,83 @@ export default function App() {
   const [scriptType, setScriptType] = useState("Standard Video (5–8 min)");
   const [tone, setTone] = useState("Educational");
   const [script, setScript] = useState(sampleScript);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(false);\n  const [generating, setGenerating] = useState(false);\n  const [error, setError] = useState("");
+  const [history, setHistory] = useState<string[]>(["Sleepytime songs for kids"]);
+  const [mobileNav, setMobileNav] = useState(false);
+
+  async function copyScript() {
+    try {
+      await navigator.clipboard.writeText(script);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  async function generateScript() {
+    if (!prompt.trim()) {
+      setError("Enter a video topic or idea before generating.");
+      return;
+    }
+    setGenerating(true);
+    setError("");
+    try {
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: prompt, scriptType, tone })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Script generation failed.");
+      setScript(data.script);
+      setHistory((items) => [prompt.replace(/\\n/g, " ").slice(0, 42), ...items].slice(0, 8));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setGenerating(false);
+    }
+  }rt { useState } from "react";
+import {
+  AudioLines, BookOpen, CalendarDays, Camera, ChevronDown, Clock3, Copy,
+  FileText, LayoutDashboard, Mic2, Moon, Plus, Settings, Sparkles,
+  Subtitles, WandSparkles, Image as ImageIcon, PencilLine, Trash2,
+  PanelLeftClose, Menu, Check
+} from "lucide-react";
+
+type NavItem = { label: string; icon: typeof LayoutDashboard };
+
+const navigation: NavItem[] = [
+  { label: "Dashboard", icon: LayoutDashboard },
+  { label: "Script Writer", icon: WandSparkles },
+  { label: "Voice Generator", icon: Mic2 },
+  { label: "Title & SEO Box", icon: PencilLine },
+  { label: "Thumbnail", icon: ImageIcon },
+  { label: "Scenes", icon: CalendarDays },
+  { label: "Settings", icon: Settings },
+];
+
+const sampleScript = `[HOOK]
+(Upbeat background music starts. The host, a lively educator, appears on screen with a fun animation of a moon behind them.)
+
+Host: "Hey there, little adventurers! Are you ready for a magical journey to dreamland?"
+
+[MAIN CONTENT]
+(Animation of a spaceship lands on the moon, and the host starts to tell the story.)
+
+Host: "Once upon a time, in a world far, far away, there was a magical moon that glowed with a soft, silvery light. The moon loved to tell stories to the stars and planets, and tonight, it had a special tale to share with you!"
+
+(The animation shows the moon speaking to the stars and planets, who gather around to listen.)
+
+Host: "The moon told the story of the moonflowers that bloomed only on the quietest nights..."`;
+
+export default function App() {
+  const [active, setActive] = useState("Script Writer");
+  const [prompt, setPrompt] = useState("Silly Sleepytime Songs for Crazy Kids\nI want a kids lullaby story");
+  const [scriptType, setScriptType] = useState("Standard Video (5–8 min)");
+  const [tone, setTone] = useState("Educational");
+  const [script, setScript] = useState(sampleScript);
+  const [copied, setCopied] = useState(false);\n  const [generating, setGenerating] = useState(false);\n  const [error, setError] = useState("");
   const [history, setHistory] = useState<string[]>(["Sleepytime songs for kids"]);
   const [mobileNav, setMobileNav] = useState(false);
 
@@ -101,7 +177,7 @@ export default function App() {
               <div className="tone-grid">
                 {["Educational", "Cinematic", "Humorous", "Creepy"].map((item) => <button key={item} className={`tone-button ${tone === item ? "selected" : ""}`} onClick={() => setTone(item)}>{item}</button>)}
               </div>
-              <button className="generate-button" onClick={generateScript}><Sparkles size={16}/> Generate Script</button>
+              <button className="generate-button" onClick={generateScript} disabled={generating}><Sparkles size={16}/> {generating ? "Writing your script…" : "Generate Script"}</button>{error && <div className="generation-error" role="alert">{error}</div>}
             </section>
 
             <section className="editor-panel">
